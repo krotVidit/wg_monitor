@@ -23,4 +23,3 @@ func RunCommand(client *ssh.Client, cmd string) (string, error) {
 	}
 	return string(output), nil
 }
-
