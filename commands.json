@@ -1,0 +1,3 @@
+{
+  "wg": "sudo wg show all dump | awk -v now=\"$(date +%s)\" '$6 != 0 && (now - $6) < 180 {print $1, $4, $5, strftime(\"%H:%M:%S\", $6)}'"
+}
