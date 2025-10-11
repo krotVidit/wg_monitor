@@ -31,7 +31,7 @@ func Run() (string, error) {
 		}
 	}()
 
-	fmt.Println("Подключено к серверу")
+	fmt.Println("✅ Подключено к серверу")
 
 	// cmd := `sudo wg show all dump | awk -v now="$(date +%s)" '$6 != 0 && (now - $6) < 180 {print $1, $4, $5, strftime("%H:%M:%S", $6)}'`
 	cmd, err := command.LoadCommand("commands.json")
@@ -40,7 +40,7 @@ func Run() (string, error) {
 	}
 	output, err := command.RunCommand(client, cmd["wg"])
 	if err != nil {
-		return "", fmt.Errorf("ошибка выполнения команды: %w", err)
+		return "", fmt.Errorf("❌ ошибка выполнения команды: %w", err)
 	}
 
 	return output, nil
