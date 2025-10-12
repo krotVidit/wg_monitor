@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	User    string `json:"user"`
-	Host    string `json:"host"`
-	Port    int    `json:"port"`
-	PathKey string `json:"private_key_path"`
+	User     string `json:"user"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	PathKey  string `json:"private_key_path"`
+	KnowHost string `json:"know_host"`
 }
 
 func LoadConfig(pathFile string) (*Config, error) {

@@ -19,8 +19,11 @@ func Run() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("ошибка чтения ключа: %w", err)
 	}
+	sshConfig, err := connect.NewSSHConfig(signer, cfg)
+	if err != nil {
+		return "", fmt.Errorf("ошибка создания SSH-конфигурации: %w", err)
+	}
 
-	sshConfig := connect.NewSSHConfig(signer, cfg)
 	client, err := connect.ConnectSSH(cfg, sshConfig)
 	if err != nil {
 		return "", fmt.Errorf("ошибка подключения к серверу: %w", err)
@@ -33,7 +36,6 @@ func Run() (string, error) {
 
 	fmt.Println("✅ Подключено к серверу")
 
-	// cmd := `sudo wg show all dump | awk -v now="$(date +%s)" '$6 != 0 && (now - $6) < 180 {print $1, $4, $5, strftime("%H:%M:%S", $6)}'`
 	cmd, err := command.LoadCommand("commands.json")
 	if err != nil {
 		return "", fmt.Errorf("ошибка загрузки файла с командами %w", err)
