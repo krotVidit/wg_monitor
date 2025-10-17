@@ -1,3 +1,4 @@
+// Package command
 package command
 
 import "golang.org/x/crypto/ssh"
