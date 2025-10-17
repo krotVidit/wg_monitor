@@ -32,7 +32,11 @@ func (r *Runner) Run() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("ошибка подключения к серверу: %w", err)
 	}
-	defer client.Close()
+	defer func() {
+		if e := client.Close(); e != nil {
+			fmt.Println("Ошибка закрытия сессии:", e)
+		}
+	}()
 
 	fmt.Println("✅ Подключено к серверу")
 
