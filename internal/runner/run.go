@@ -3,6 +3,7 @@ package runner
 
 import (
 	"fmt"
+	"sort"
 )
 
 type Runner struct {
@@ -45,10 +46,39 @@ func (r *Runner) Run() (string, error) {
 		return "", fmt.Errorf("ошибка загрузки команд: %w", err)
 	}
 
-	output, err := r.commands.RunCommand(client, cmds["wg"])
+	key, err := selectCommand(cmds)
+	if err != nil {
+		return "", fmt.Errorf("ошибка выбора комманды: %w", err)
+	}
+
+	output, err := r.commands.RunCommand(client, cmds[key])
 	if err != nil {
 		return "", fmt.Errorf("ошибка выполнения команды: %w", err)
 	}
 
 	return output, nil
+}
+
+func selectCommand(cmds map[string]string) (string, error) {
+	fmt.Println("Доступные команды")
+	keys := make([]string, 0, len(cmds))
+
+	for name := range cmds {
+		keys = append(keys, name)
+	}
+	sort.Strings(keys)
+
+	for i, name := range keys {
+		fmt.Printf("  %d. %s\n", i+1, name)
+	}
+
+	var selectedUser int
+	fmt.Print("Ввыбор команды: ")
+	_, err := fmt.Scan(&selectedUser)
+	if err != nil || selectedUser < 1 || selectedUser > len(keys) {
+		return "", fmt.Errorf("некорректный выбор")
+	}
+
+	selectedKey := keys[selectedUser-1]
+	return selectedKey, err
 }
