@@ -3,46 +3,47 @@ package runner
 
 import (
 	"fmt"
-
-	"wg-monitor/app/internal/command"
-	"wg-monitor/app/internal/connect"
-	"wg-monitor/app/internal/domain"
 )
 
-func Run() (string, error) {
-	cfg, err := domain.LoadConfig("config.json")
-	if err != nil {
-		return "", fmt.Errorf("ошибка чтения файла json: %w", err)
-	}
+type Runner struct {
+	connector SSHConnector
+	commands  CommandRunner
+}
 
-	signer, err := connect.GetSigner(cfg)
+func New(connector SSHConnector, commands CommandRunner) *Runner {
+	return &Runner{
+		connector: connector,
+		commands:  commands,
+	}
+}
+
+func (r *Runner) Run() (string, error) {
+	signer, err := r.connector.GetSigner()
 	if err != nil {
 		return "", fmt.Errorf("ошибка чтения ключа: %w", err)
 	}
-	sshConfig, err := connect.NewSSHConfig(signer, cfg)
+
+	cfg, err := r.connector.NewConfig(signer)
 	if err != nil {
 		return "", fmt.Errorf("ошибка создания SSH-конфигурации: %w", err)
 	}
 
-	client, err := connect.ConnectSSH(cfg, sshConfig)
+	client, err := r.connector.Connect(cfg)
 	if err != nil {
 		return "", fmt.Errorf("ошибка подключения к серверу: %w", err)
 	}
-	defer func() {
-		if e := client.Close(); e != nil {
-			fmt.Println("Ошибка закрытия сессии:", e)
-		}
-	}()
+	defer client.Close()
 
 	fmt.Println("✅ Подключено к серверу")
 
-	cmd, err := command.LoadCommand("commands.json")
+	cmds, err := r.commands.LoadCommand("commands.json")
 	if err != nil {
-		return "", fmt.Errorf("ошибка загрузки файла с командами %w", err)
+		return "", fmt.Errorf("ошибка загрузки команд: %w", err)
 	}
-	output, err := command.RunCommand(client, cmd["wg"])
+
+	output, err := r.commands.RunCommand(client, cmds["wg"])
 	if err != nil {
-		return "", fmt.Errorf("❌ ошибка выполнения команды: %w", err)
+		return "", fmt.Errorf("ошибка выполнения команды: %w", err)
 	}
 
 	return output, nil
