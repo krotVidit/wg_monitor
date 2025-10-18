@@ -6,6 +6,16 @@ import (
 	"sort"
 )
 
+// ANSI цвета для CLI
+const (
+	colorReset  = "\033[0m"
+	colorRed    = "\033[31m"
+	colorGreen  = "\033[32m"
+	colorYellow = "\033[33m"
+	colorCyan   = "\033[36m"
+	colorBold   = "\033[1m"
+)
+
 type Runner struct {
 	connector SSHConnector
 	commands  CommandRunner
@@ -35,11 +45,11 @@ func (r *Runner) Run() (string, error) {
 	}
 	defer func() {
 		if e := client.Close(); e != nil {
-			fmt.Println("Ошибка закрытия сессии:", e)
+			fmt.Println(colorRed, "Ошибка закрытия сессии:", e, colorReset)
 		}
 	}()
 
-	fmt.Println("✅ Подключено к серверу")
+	fmt.Println(colorGreen + "✅ Подключено к серверу" + colorReset)
 
 	cmds, err := r.commands.LoadCommand("commands.json")
 	if err != nil {
@@ -49,29 +59,36 @@ func (r *Runner) Run() (string, error) {
 	for {
 		key, err := selectCommand(cmds)
 		if err != nil {
-			fmt.Println("Ошибка:", err)
+			fmt.Println(colorRed+"Ошибка:", err, colorReset)
 			continue
 		}
 
 		if key == "exit" {
-			fmt.Println("👋 Выход из программы.")
+			fmt.Println(colorYellow + "👋 Выход из программы." + colorReset)
 			break
 		}
 
+		fmt.Printf(colorCyan+"\n🚀 Выполняется команда: %s\n"+colorReset, key)
+		fmt.Println(colorCyan + "----------------------------------------" + colorReset)
+
 		output, err := r.commands.RunCommand(client, cmds[key])
 		if err != nil {
-			fmt.Println("Ошибка выполнения команды:", err)
+			fmt.Println(colorRed+"Ошибка выполнения команды:", err, colorReset)
 			continue
 		}
 
-		fmt.Printf("\n===== Результат команды '%s' =====\n%s\n", key, output)
+		fmt.Printf(colorGreen+"\n===== Результат команды '%s' =====\n%s\n"+colorReset, key, output)
+		fmt.Println(colorCyan + "========================================" + colorReset)
 	}
 
 	return "Завершено.", nil
 }
 
 func selectCommand(cmds map[string]string) (string, error) {
-	fmt.Println("\nДоступные команды:")
+	fmt.Println(colorBold + "\n========================================" + colorReset)
+	fmt.Println(colorBold + "           Доступные команды" + colorReset)
+	fmt.Println(colorBold + "========================================" + colorReset)
+
 	keys := make([]string, 0, len(cmds))
 	for name := range cmds {
 		keys = append(keys, name)
@@ -79,12 +96,12 @@ func selectCommand(cmds map[string]string) (string, error) {
 	sort.Strings(keys)
 
 	for i, name := range keys {
-		fmt.Printf("  %d. %s\n", i+1, name)
+		fmt.Printf(colorCyan+"  %d."+colorReset+" %s\n", i+1, name)
 	}
-	fmt.Printf("  0. Выйти\n")
+	fmt.Printf(colorYellow + "  0." + colorReset + " Выйти\n")
 
 	var selectedUser int
-	fmt.Print("Выбор команды: ")
+	fmt.Print(colorBold + "\nВыбор команды: " + colorReset)
 	_, err := fmt.Scan(&selectedUser)
 	if err != nil {
 		return "", fmt.Errorf("некорректный ввод")
