@@ -3,7 +3,6 @@ package runner
 
 import (
 	"fmt"
-	"sort"
 )
 
 // ANSI цвета для CLI
@@ -19,12 +18,14 @@ const (
 type Runner struct {
 	connector SSHConnector
 	commands  CommandRunner
+	ui        UI
 }
 
-func New(connector SSHConnector, commands CommandRunner) *Runner {
+func New(connector SSHConnector, commands CommandRunner, ui UI) *Runner {
 	return &Runner{
 		connector: connector,
 		commands:  commands,
+		ui:        ui,
 	}
 }
 
@@ -57,7 +58,7 @@ func (r *Runner) Run() (string, error) {
 	}
 
 	for {
-		key, err := selectCommand(cmds)
+		key, err := r.ui.SelectCommand(cmds)
 		if err != nil {
 			fmt.Println(colorRed+"Ошибка:", err, colorReset)
 			continue
@@ -82,37 +83,4 @@ func (r *Runner) Run() (string, error) {
 	}
 
 	return "Завершено.", nil
-}
-
-func selectCommand(cmds map[string]string) (string, error) {
-	fmt.Println(colorBold + "\n========================================" + colorReset)
-	fmt.Println(colorBold + "           Доступные команды" + colorReset)
-	fmt.Println(colorBold + "========================================" + colorReset)
-
-	keys := make([]string, 0, len(cmds))
-	for name := range cmds {
-		keys = append(keys, name)
-	}
-	sort.Strings(keys)
-
-	for i, name := range keys {
-		fmt.Printf(colorCyan+"  %d."+colorReset+" %s\n", i+1, name)
-	}
-	fmt.Printf(colorYellow + "  0." + colorReset + " Выйти\n")
-
-	var selectedUser int
-	fmt.Print(colorBold + "\nВыбор команды: " + colorReset)
-	_, err := fmt.Scan(&selectedUser)
-	if err != nil {
-		return "", fmt.Errorf("некорректный ввод")
-	}
-
-	if selectedUser == 0 {
-		return "exit", nil
-	}
-	if selectedUser < 1 || selectedUser > len(keys) {
-		return "", fmt.Errorf("некорректный выбор")
-	}
-
-	return keys[selectedUser-1], nil
 }

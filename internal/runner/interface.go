@@ -13,3 +13,7 @@ type SSHConnector interface {
 	NewConfig(signer ssh.Signer) (*ssh.ClientConfig, error)
 	Connect(cfg *ssh.ClientConfig) (*ssh.Client, error)
 }
+
+type UI interface {
+	SelectCommand(cmds map[string]string) (string, error)
+}
