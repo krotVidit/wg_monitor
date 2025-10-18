@@ -69,7 +69,7 @@ func (r *Runner) Run() (string, error) {
 		}
 
 		fmt.Print(r.ui.Wrap(output, "green"))
-		fmt.Println(r.ui.Wrap("\n====================================================", "cyan"))
+		fmt.Println(r.ui.Wrap("====================================================", "cyan"))
 	}
 
 	return "Завершено.", nil
