@@ -5,16 +5,6 @@ import (
 	"fmt"
 )
 
-// ANSI цвета для CLI
-const (
-	colorReset  = "\033[0m"
-	colorRed    = "\033[31m"
-	colorGreen  = "\033[32m"
-	colorYellow = "\033[33m"
-	colorCyan   = "\033[36m"
-	colorBold   = "\033[1m"
-)
-
 type Runner struct {
 	connector SSHConnector
 	commands  CommandRunner
@@ -46,11 +36,11 @@ func (r *Runner) Run() (string, error) {
 	}
 	defer func() {
 		if e := client.Close(); e != nil {
-			fmt.Println(colorRed, "Ошибка закрытия сессии:", e, colorReset)
+			fmt.Println(r.ui.Wrap(fmt.Sprintf("Ошибка закрытия сессии: %v", e), "red"))
 		}
 	}()
 
-	fmt.Println(colorGreen + "✅ Подключено к серверу" + colorReset)
+	fmt.Println(r.ui.Wrap("✅ Подключено к серверу", "green"))
 
 	cmds, err := r.commands.LoadCommand("commands.json")
 	if err != nil {
@@ -60,26 +50,26 @@ func (r *Runner) Run() (string, error) {
 	for {
 		key, err := r.ui.SelectCommand(cmds)
 		if err != nil {
-			fmt.Println(colorRed+"Ошибка:", err, colorReset)
+			fmt.Println(r.ui.Wrap(fmt.Sprintf("Ошибка: %v", err), "red"))
 			continue
 		}
 
 		if key == "exit" {
-			fmt.Println(colorYellow + "👋 Выход из программы." + colorReset)
+			fmt.Println(r.ui.Wrap("👋 Выход из программы.", "yellow"))
 			break
 		}
 
-		fmt.Printf(colorCyan+"\n🚀 Выполняется команда: %s\n"+colorReset, key)
-		fmt.Println(colorCyan + "====================================================" + colorReset)
+		fmt.Println(r.ui.Wrap(fmt.Sprintf("\n🚀 Выполняется команда: %s", key), "cyan"))
+		fmt.Println(r.ui.Wrap("====================================================", "cyan"))
 
 		output, err := r.commands.RunCommand(client, cmds[key])
 		if err != nil {
-			fmt.Println(colorRed+"Ошибка выполнения команды:", err, colorReset)
+			fmt.Println(r.ui.Wrap(fmt.Sprintf("Ошибка выполнения команды: %v", err), "red"))
 			continue
 		}
 
-		fmt.Printf(colorGreen+"%s"+colorReset, output)
-		fmt.Println(colorCyan + "====================================================" + colorReset)
+		fmt.Print(r.ui.Wrap(output, "green"))
+		fmt.Println(r.ui.Wrap("\n====================================================", "cyan"))
 	}
 
 	return "Завершено.", nil

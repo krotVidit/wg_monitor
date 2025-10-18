@@ -16,4 +16,6 @@ type SSHConnector interface {
 
 type UI interface {
 	SelectCommand(cmds map[string]string) (string, error)
+	Wrap(text, clr string) string
+	BoldWrap(text string) string
 }

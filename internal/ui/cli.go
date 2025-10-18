@@ -6,15 +6,6 @@ import (
 	"sort"
 )
 
-const (
-	colorReset  = "\033[0m"
-	colorRed    = "\033[31m"
-	colorGreen  = "\033[32m"
-	colorYellow = "\033[33m"
-	colorCyan   = "\033[36m"
-	colorBold   = "\033[1m"
-)
-
 func selectCommand(cmds map[string]string) (string, error) {
 	printHeader()
 	keys := sortKeys(cmds)
@@ -33,9 +24,9 @@ func selectCommand(cmds map[string]string) (string, error) {
 }
 
 func printHeader() {
-	fmt.Println(colorBold + "\n========================================" + colorReset)
-	fmt.Println(colorBold + "           Доступные команды" + colorReset)
-	fmt.Println(colorBold + "========================================" + colorReset)
+	fmt.Println(boldWrap("\n========================================"))
+	fmt.Println(boldWrap("           Доступные команды"))
+	fmt.Println(boldWrap("========================================"))
 }
 
 func sortKeys(cmds map[string]string) []string {
@@ -49,14 +40,14 @@ func sortKeys(cmds map[string]string) []string {
 
 func printCommandList(keys []string) {
 	for i, name := range keys {
-		fmt.Printf(colorCyan+"  %d."+colorReset+" %s\n", i+1, name)
+		fmt.Printf("%s %s\n", wrap(fmt.Sprintf("  %d.", i+1), "cyan"), name)
 	}
-	fmt.Printf(colorYellow + "  0." + colorReset + " Выйти\n")
+	fmt.Println(wrap("  0.", "yellow") + " Выйти")
 }
 
 func readUserSelection(max int) (int, error) {
 	var selected int
-	fmt.Print(colorBold + "\nВыбор команды: " + colorReset)
+	fmt.Print(boldWrap("\nВыбор команды: "))
 	_, err := fmt.Scan(&selected)
 	if err != nil {
 		return 0, fmt.Errorf("ввод команды: %w", err)
