@@ -46,23 +46,33 @@ func (r *Runner) Run() (string, error) {
 		return "", fmt.Errorf("ошибка загрузки команд: %w", err)
 	}
 
-	key, err := selectCommand(cmds)
-	if err != nil {
-		return "", fmt.Errorf("ошибка выбора комманды: %w", err)
+	for {
+		key, err := selectCommand(cmds)
+		if err != nil {
+			fmt.Println("Ошибка:", err)
+			continue
+		}
+
+		if key == "exit" {
+			fmt.Println("👋 Выход из программы.")
+			break
+		}
+
+		output, err := r.commands.RunCommand(client, cmds[key])
+		if err != nil {
+			fmt.Println("Ошибка выполнения команды:", err)
+			continue
+		}
+
+		fmt.Printf("\n===== Результат команды '%s' =====\n%s\n", key, output)
 	}
 
-	output, err := r.commands.RunCommand(client, cmds[key])
-	if err != nil {
-		return "", fmt.Errorf("ошибка выполнения команды: %w", err)
-	}
-
-	return output, nil
+	return "Завершено.", nil
 }
 
 func selectCommand(cmds map[string]string) (string, error) {
-	fmt.Println("Доступные команды")
+	fmt.Println("\nДоступные команды:")
 	keys := make([]string, 0, len(cmds))
-
 	for name := range cmds {
 		keys = append(keys, name)
 	}
@@ -71,14 +81,21 @@ func selectCommand(cmds map[string]string) (string, error) {
 	for i, name := range keys {
 		fmt.Printf("  %d. %s\n", i+1, name)
 	}
+	fmt.Printf("  0. Выйти\n")
 
 	var selectedUser int
-	fmt.Print("Ввыбор команды: ")
+	fmt.Print("Выбор команды: ")
 	_, err := fmt.Scan(&selectedUser)
-	if err != nil || selectedUser < 1 || selectedUser > len(keys) {
+	if err != nil {
+		return "", fmt.Errorf("некорректный ввод")
+	}
+
+	if selectedUser == 0 {
+		return "exit", nil
+	}
+	if selectedUser < 1 || selectedUser > len(keys) {
 		return "", fmt.Errorf("некорректный выбор")
 	}
 
-	selectedKey := keys[selectedUser-1]
-	return selectedKey, err
+	return keys[selectedUser-1], nil
 }
