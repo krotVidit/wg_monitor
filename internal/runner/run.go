@@ -69,7 +69,7 @@ func (r *Runner) Run() (string, error) {
 		}
 
 		fmt.Printf(colorCyan+"\n🚀 Выполняется команда: %s\n"+colorReset, key)
-		fmt.Println(colorCyan + "----------------------------------------" + colorReset)
+		fmt.Println(colorCyan + "====================================================" + colorReset)
 
 		output, err := r.commands.RunCommand(client, cmds[key])
 		if err != nil {
@@ -77,8 +77,8 @@ func (r *Runner) Run() (string, error) {
 			continue
 		}
 
-		fmt.Printf(colorGreen+"\n===== Результат команды '%s' =====\n%s\n"+colorReset, key, output)
-		fmt.Println(colorCyan + "========================================" + colorReset)
+		fmt.Printf(colorGreen+"%s"+colorReset, output)
+		fmt.Println(colorCyan + "====================================================" + colorReset)
 	}
 
 	return "Завершено.", nil
