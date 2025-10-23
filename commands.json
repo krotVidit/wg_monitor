@@ -2,5 +2,7 @@
   "wg": "sudo wg show all dump | awk -v now=\"$(date +%s)\" '$6 != 0 && (now - $6) < 180 {print $1, $4, $5, strftime(\"%H:%M:%S\", $6)}'",
   "free": "free -h",
   "df": "df -h",
-  "journal": "sudo journalctl -b -p 3"
+  "journal": "sudo journalctl -b -p 3",
+  "curl": "curl -s https://ipinfo.io",
+  "ping": "ping -c 5 -q google.com"
 }
