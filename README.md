@@ -49,7 +49,7 @@ go run main.go
 
 Собираем Бинарник
 ```bash
-go build -o wg_monitor main.go
+go build -o wg_monitor ./main.go
 ```
 Запускаем Бинарник 
 ```bash
